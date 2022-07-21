@@ -31,13 +31,13 @@ export default function SignUp({ navigation }) {
       setErrorMessage('Invalid email address.');
     }
     else if (password.length < 7 || password.length > 20) {
-      setErrorMessage('Password must be between 7 and 20 characters.');
+      setErrorMessage('Password must be 7 to 20 characters long.');
     }
     else if (displayName.length < 3 || displayName.length > 15) {
-      setErrorMessage('Display name must be between 3 and 15 characters.');
+      setErrorMessage('Display name must be 3 to 15 characters long.');
     }
     else if (!/^[a-zA-Z0-9_]*$/.test(displayName)) {
-      setErrorMessage('Display name must only include alphanumeric characters.')
+      setErrorMessage('Display name can only contain letters and numbers.')
     }
     else {
       signUp({ email, password, displayName });
@@ -136,10 +136,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorBox: {
-    flex: 0.2,
+    flex: 0.3,
   },
   inputBox: {
-    flex: 1.2,
+    flex: 2.5,
   },
   buttonBox: {
     justifyContent: 'center',

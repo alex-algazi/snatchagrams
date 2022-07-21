@@ -112,7 +112,10 @@ export default function App() {
           console.log(error);
         });
     },
-    resetErrors: async () => {},
+    resetErrors: async () => {
+      setSignInError('');
+      setSignUpError('');
+    },
   }),[signInError, signUpError]);
 
   return (
