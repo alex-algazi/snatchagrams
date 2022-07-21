@@ -17,6 +17,18 @@ export default function SignIn({ navigation }) {
     // stuff
   },[signInError]);
 
+  function handleSubmit() {
+    if (!email || !password) {
+      setErrorMessage('Please fill out both fields.')
+    }
+    else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/g.test(email)) {
+      setErrorMessage('Invalid email address.');
+    }
+    else {
+      signIn({ email, password });
+    }
+  }
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.safe}>
@@ -34,7 +46,7 @@ export default function SignIn({ navigation }) {
           <View style={styles.inputBox}>
             <TextInput
               mode='outlined'
-              placeholder='email'
+              placeholder='Email'
               value={email}
               onChangeText={setEmail}
               keyboardType='email-address'
@@ -58,7 +70,7 @@ export default function SignIn({ navigation }) {
           <View style={styles.buttonBox}>
             <Button
               mode='contained'
-              onPress={() => signIn({ email, password })}
+              onPress={handleSubmit}
             >
               Sign in
             </Button>

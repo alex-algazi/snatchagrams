@@ -18,7 +18,10 @@ export default function SignUp({ navigation }) {
   },[signUpError]);
 
   function handleSubmit() {
-    if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/g.test(email)) {
+    if (!email || !password) {
+      setErrorMessage('Please fill out both fields.')
+    }
+    else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/g.test(email)) {
       setErrorMessage('Invalid email address.');
     }
     else if (password.length < 7 || password.length > 20) {
