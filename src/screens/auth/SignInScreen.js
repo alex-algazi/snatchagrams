@@ -14,7 +14,15 @@ export default function SignIn({ navigation }) {
   const [errorStatus] = signInError;
 
   useEffect(() => {
-    // stuff
+    if (errorStatus === 'auth/user-not-found') {
+      setErrorMessage('No user found with the given email.');
+    }
+    else if (errorStatus === 'auth/wrong-password') {
+      setErrorMessage('Incorrect password.');
+    }
+    else {
+      setErrorMessage('');
+    }
   },[signInError]);
 
   function handleSubmit() {

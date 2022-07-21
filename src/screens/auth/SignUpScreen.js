@@ -10,25 +10,37 @@ export default function SignUp({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(true);
+  const [displayName, setDisplayName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [errorStatus] = signUpError;
 
   useEffect(() => {
-    // stuff
+    if (errorStatus === 'auth/email-already-in-use') {
+      setErrorMessage('Account already exists with this email.');
+    }
+    else {
+      setErrorMessage('');
+    }
   },[signUpError]);
 
   function handleSubmit() {
-    if (!email || !password) {
-      setErrorMessage('Please fill out both fields.')
+    if (!email || !password || !displayName) {
+      setErrorMessage('Please fill out all fields.')
     }
-    else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/g.test(email)) {
+    else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
       setErrorMessage('Invalid email address.');
     }
     else if (password.length < 7 || password.length > 20) {
       setErrorMessage('Password must be between 7 and 20 characters.');
     }
+    else if (displayName.length < 3 || displayName.length > 15) {
+      setErrorMessage('Display name must be between 3 and 15 characters.');
+    }
+    else if (!/^[a-zA-Z0-9_]*$/.test(displayName)) {
+      setErrorMessage('Display name must only include alphanumeric characters.')
+    }
     else {
-      signUp({ email, password });
+      signUp({ email, password, displayName });
     }
   }
 
@@ -68,6 +80,13 @@ export default function SignUp({ navigation }) {
                   onPress={() => setPasswordVisible(!passwordVisible)}
                 />
               }
+            />
+            <TextInput
+              mode='outlined'
+              placeholder='Display name'
+              value={displayName}
+              onChangeText={setDisplayName}
+              autoCapitalize='none'
             />
           </View>
           <View style={styles.buttonBox}>

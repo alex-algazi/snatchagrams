@@ -5,7 +5,7 @@ import { navigationRef } from './src/components/auth/RootNavigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp } from 'firebase/app';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
 import firebaseConfig from './config.json';
 import SignInScreen from './src/screens/auth/SignInScreen';
@@ -63,21 +63,21 @@ export default function App() {
     }
   );
 
-  useEffect(() => {
-    // async function bootstrapAsync() {
-    //   let AT;
-    //   try {
-    //     AT = await SecureStore.getItemAsync('accessToken');
-    //   } catch (e) {
-    //     dispatch({ type: 'SIGN_OUT' });
-    //   }
-    //   if (AT) {
-    //     dispatch({ type: 'RESTORE_TOKEN' });
-    //     // api call to check token
-    //   }
-    // }
-    // bootstrapAsync();
-  },[]);
+  // useEffect(() => {
+  //   async function bootstrapAsync() {
+  //     let AT;
+  //     try {
+  //       AT = await SecureStore.getItemAsync('accessToken');
+  //     } catch (e) {
+  //       dispatch({ type: 'SIGN_OUT' });
+  //     }
+  //     if (AT) {
+  //       dispatch({ type: 'RESTORE_TOKEN' });
+  //       // api call to check token
+  //     }
+  //   }
+  //   bootstrapAsync();
+  // },[]);
 
   const authContext = useMemo(() => ({
     signInError: [signInError, setSignInError],
@@ -86,14 +86,32 @@ export default function App() {
       signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
           console.log(userCredential);
+          // dispatch({ type: 'SIGN_IN' });
         })
         .catch((error) => {
-          console.log(error.code);
-          console.log(error.message);
+          setSignInError(error.code);
         });
     },
-    signUp: async (data) => {},
-    signOut: async () => {},
+    signUp: async (data) => {
+      createUserWithEmailAndPassword(auth, data.email, data.password)
+        .then((userCredential) => {
+          console.log(userCredential);
+          // dispatch({ type: 'SIGN_IN' });
+          return userCredential.user.updateProfile({ displayName: data.displayName });
+        })
+        .catch((error) => {
+          setSignUpError(error.code);
+        });
+    },
+    signOut: async () => {
+      signOut(auth)
+        .then(() => {
+          dispatch({ type: 'SIGN_OUT' });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
     resetErrors: async () => {},
   }),[signInError, signUpError]);
 
@@ -123,7 +141,7 @@ export default function App() {
               <>
                 <Stack.Screen
                   name='Home'
-                  component={HomeNavigation}
+                  component={HomeScreen}
                 />
                 <Stack.Screen
                   name='Profile'
