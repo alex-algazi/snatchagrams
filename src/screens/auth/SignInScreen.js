@@ -27,7 +27,7 @@ export default function SignIn({ navigation }) {
 
   function handleSubmit() {
     if (!email || !password) {
-      setErrorMessage('Please fill out both fields.')
+      setErrorMessage('Please fill out both fields.');
     }
     else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/g.test(email)) {
       setErrorMessage('Invalid email address.');
@@ -96,6 +96,7 @@ export default function SignIn({ navigation }) {
                 resetErrors();
                 setEmail('');
                 setPassword('');
+                setErrorMessage('');
                 navigation.navigate('SignUp');
               }}
             >
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorBox: {
-    flex: 0.2,
+    flex: 0.25,
   },
   inputBox: {
     flex: 1.2,

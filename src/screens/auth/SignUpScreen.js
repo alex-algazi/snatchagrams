@@ -25,7 +25,7 @@ export default function SignUp({ navigation }) {
 
   function handleSubmit() {
     if (!email || !password || !displayName) {
-      setErrorMessage('Please fill out all fields.')
+      setErrorMessage('Please fill out all fields.');
     }
     else if (!/^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(email)) {
       setErrorMessage('Invalid email address.');
@@ -37,7 +37,7 @@ export default function SignUp({ navigation }) {
       setErrorMessage('Display name must be 3 to 15 characters long.');
     }
     else if (!/^[a-zA-Z0-9_]*$/.test(displayName)) {
-      setErrorMessage('Display name can only contain letters and numbers.')
+      setErrorMessage('Display name can only contain letters and numbers.');
     }
     else {
       signUp({ email, password, displayName });
@@ -47,6 +47,7 @@ export default function SignUp({ navigation }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.safe}>
+        <View style={styles.spacer}/>
         <View style={styles.container}>
           <View style={styles.headerBox}>
             <Headline style={styles.header}>
@@ -117,12 +118,15 @@ export default function SignUp({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   container: {
     width: '80%',
     height: '60%',
+  },
+  spacer: {
+    height: '15.5%',
   },
   header: {
     textAlign: 'center',
@@ -136,7 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorBox: {
-    flex: 0.3,
+    flex: 0.25,
   },
   inputBox: {
     flex: 2.5,
