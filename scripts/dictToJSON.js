@@ -2,8 +2,8 @@ const fs = require('fs');
 
 const input = './assets/NWL2020.txt';
 const output = './assets/NWL2020.json';
-// const input = './assets/CSW22.txt';
-// const output = './assets/CSW22.json';
+// const input = './assets/CSW21.txt';
+// const output = './assets/CSW21.json';
 
 const arr = fs.readFileSync(input).toString().split('\n');
 const obj = {};
