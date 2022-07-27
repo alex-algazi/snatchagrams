@@ -18,6 +18,9 @@ export default function SignUp({ navigation }) {
     if (errorStatus === 'auth/email-already-in-use') {
       setErrorMessage('Account already exists with this email.');
     }
+    else if (errorStatus === 'auth/invalid-email') {
+      setErrorMessage('Invalid email address.');
+    }
     else {
       setErrorMessage('');
     }

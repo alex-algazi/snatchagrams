@@ -4,12 +4,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { navigationRef } from './src/components/auth/RootNavigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from 'firebase/app';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
+import { getApps, getApp, initializeApp } from 'firebase/app';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
 import firebaseConfig from './config.json';
 import SignInScreen from './src/screens/auth/SignInScreen';
 import SignUpScreen from './src/screens/auth/SignUpScreen';
+import HomeScreen from './src/screens/HomeScreen';
 import AuthContext from './src/components/auth/AuthContext';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
@@ -22,14 +23,11 @@ const theme = {
   },
 }
 
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  let app, auth;
+
   const [signInError, setSignInError] = useState('');
   const [signUpError, setSignUpError] = useState('');
 
@@ -63,21 +61,22 @@ export default function App() {
     }
   );
 
-  // useEffect(() => {
-  //   async function bootstrapAsync() {
-  //     let AT;
-  //     try {
-  //       AT = await SecureStore.getItemAsync('accessToken');
-  //     } catch (e) {
-  //       dispatch({ type: 'SIGN_OUT' });
-  //     }
-  //     if (AT) {
-  //       dispatch({ type: 'RESTORE_TOKEN' });
-  //       // api call to check token
-  //     }
-  //   }
-  //   bootstrapAsync();
-  // },[]);
+  useEffect(() => {
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+      auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+    }
+    else {
+      app = getApp();
+      auth = getAuth();
+    }
+    SecureStore.getItemAsync('email')
+      .then((email) => {
+        if (email) {
+          dispatch({ type: 'RESTORE_TOKEN' });
+        }
+      });
+  },[]);
 
   const authContext = useMemo(() => ({
     signInError: [signInError, setSignInError],
@@ -85,8 +84,9 @@ export default function App() {
     signIn: async (data) => {
       signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
-          console.log(userCredential);
-          // dispatch({ type: 'SIGN_IN' });
+          SecureStore.setItemAsync('displayName', userCredential.user.displayName);
+          SecureStore.setItemAsync('email', userCredential.user.email);
+          dispatch({ type: 'SIGN_IN' });
         })
         .catch((error) => {
           setSignInError(error.code);
@@ -95,9 +95,15 @@ export default function App() {
     signUp: async (data) => {
       createUserWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
-          console.log(userCredential);
-          // dispatch({ type: 'SIGN_IN' });
-          return userCredential.user.updateProfile({ displayName: data.displayName });
+          updateProfile(userCredential.user, { displayName: data.displayName })
+            .then(() => {
+              SecureStore.setItemAsync('displayName', data.displayName);
+              SecureStore.setItemAsync('email', data.email);
+              dispatch({ type: 'SIGN_IN' });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         })
         .catch((error) => {
           setSignUpError(error.code);
@@ -106,6 +112,8 @@ export default function App() {
     signOut: async () => {
       signOut(auth)
         .then(() => {
+          SecureStore.deleteItemAsync('displayName');
+          SecureStore.deleteItemAsync('email');
           dispatch({ type: 'SIGN_OUT' });
         })
         .catch((error) => {
@@ -145,14 +153,9 @@ export default function App() {
                 <Stack.Screen
                   name='Home'
                   component={HomeScreen}
-                />
-                <Stack.Screen
-                  name='Profile'
-                  component={ProfileScreen}
-                />
-                <Stack.Screen
-                  name='Settings'
-                  component={SettingsScreen}
+                  options={{
+                    headerShown: false,
+                  }}
                 />
               </>
             )}
