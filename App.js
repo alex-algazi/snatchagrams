@@ -5,8 +5,9 @@ import { navigationRef } from './src/components/auth/RootNavigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApps, getApp, initializeApp } from 'firebase/app';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
+import { getDatabase, ref, set } from 'firebase/database';
 import firebaseConfig from './config.json';
 import SignInScreen from './src/screens/auth/SignInScreen';
 import SignUpScreen from './src/screens/auth/SignUpScreen';
@@ -26,7 +27,7 @@ const theme = {
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  let app, auth;
+  let app, auth, db;
 
   const [signInError, setSignInError] = useState('');
   const [signUpError, setSignUpError] = useState('');
@@ -70,6 +71,7 @@ export default function App() {
       app = getApp();
       auth = getAuth();
     }
+    db = getDatabase(app);
     SecureStore.getItemAsync('email')
       .then((email) => {
         if (email) {
@@ -82,6 +84,7 @@ export default function App() {
     signInError: [signInError, setSignInError],
     signUpError: [signUpError, setSignUpError],
     signIn: async (data) => {
+      console.log(auth);
       signInWithEmailAndPassword(auth, data.email, data.password)
         .then((userCredential) => {
           SecureStore.setItemAsync('displayName', userCredential.user.displayName);
@@ -89,6 +92,7 @@ export default function App() {
           dispatch({ type: 'SIGN_IN' });
         })
         .catch((error) => {
+          console.log(error);
           setSignInError(error.code);
         });
     },
@@ -99,6 +103,10 @@ export default function App() {
             .then(() => {
               SecureStore.setItemAsync('displayName', data.displayName);
               SecureStore.setItemAsync('email', data.email);
+              set(ref(db, 'users/' + userCredential.user.uid), {
+                email: data.email,
+                name: data.displayName,
+              });
               dispatch({ type: 'SIGN_IN' });
             })
             .catch((error) => {
@@ -106,6 +114,7 @@ export default function App() {
             });
         })
         .catch((error) => {
+          console.log(error);
           setSignUpError(error.code);
         });
     },
