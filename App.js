@@ -27,7 +27,7 @@ const theme = {
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  let app, auth, db;
+  let app;
 
   const [signInError, setSignInError] = useState('');
   const [signUpError, setSignUpError] = useState('');
@@ -65,14 +65,12 @@ export default function App() {
   useEffect(() => {
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig);
-      auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+      initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
     }
     else {
       app = getApp();
-      auth = getAuth();
     }
-    db = getDatabase(app);
-    SecureStore.getItemAsync('email')
+    SecureStore.getItemAsync('email') // TODO change to auth listener https://firebase.google.com/docs/auth/web/manage-users
       .then((email) => {
         if (email) {
           dispatch({ type: 'RESTORE_TOKEN' });
@@ -84,26 +82,24 @@ export default function App() {
     signInError: [signInError, setSignInError],
     signUpError: [signUpError, setSignUpError],
     signIn: async (data) => {
-      console.log(auth);
-      signInWithEmailAndPassword(auth, data.email, data.password)
+      signInWithEmailAndPassword(getAuth(app), data.email, data.password)
         .then((userCredential) => {
           SecureStore.setItemAsync('displayName', userCredential.user.displayName);
           SecureStore.setItemAsync('email', userCredential.user.email);
           dispatch({ type: 'SIGN_IN' });
         })
         .catch((error) => {
-          console.log(error);
           setSignInError(error.code);
         });
     },
     signUp: async (data) => {
-      createUserWithEmailAndPassword(auth, data.email, data.password)
+      createUserWithEmailAndPassword(getAuth(app), data.email, data.password)
         .then((userCredential) => {
           updateProfile(userCredential.user, { displayName: data.displayName })
             .then(() => {
               SecureStore.setItemAsync('displayName', data.displayName);
               SecureStore.setItemAsync('email', data.email);
-              set(ref(db, 'users/' + userCredential.user.uid), {
+              set(ref(getDatabase(app), 'users/' + userCredential.user.uid), {
                 email: data.email,
                 name: data.displayName,
               });
@@ -114,15 +110,16 @@ export default function App() {
             });
         })
         .catch((error) => {
-          console.log(error);
           setSignUpError(error.code);
         });
     },
     signOut: async () => {
-      signOut(auth)
+      signOut(getAuth(app))
         .then(() => {
           SecureStore.deleteItemAsync('displayName');
           SecureStore.deleteItemAsync('email');
+          setSignInError('');
+          setSignUpError('');
           dispatch({ type: 'SIGN_OUT' });
         })
         .catch((error) => {
