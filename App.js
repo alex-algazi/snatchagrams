@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApps, getApp, initializeApp } from 'firebase/app';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth/react-native';
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, push } from 'firebase/database';
 import firebaseConfig from './config.json';
 import SignInScreen from './src/screens/auth/SignInScreen';
 import SignUpScreen from './src/screens/auth/SignUpScreen';
@@ -27,7 +27,7 @@ const theme = {
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  let app;
+  let app, auth;
 
   const [signInError, setSignInError] = useState('');
   const [signUpError, setSignUpError] = useState('');
@@ -65,17 +65,20 @@ export default function App() {
   useEffect(() => {
     if (getApps().length === 0) {
       app = initializeApp(firebaseConfig);
-      initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+      auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
     }
     else {
       app = getApp();
+      auth = getAuth();
     }
-    SecureStore.getItemAsync('email') // TODO change to auth listener https://firebase.google.com/docs/auth/web/manage-users
-      .then((email) => {
-        if (email) {
-          dispatch({ type: 'RESTORE_TOKEN' });
-        }
-      });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        dispatch({ type: 'RESTORE_TOKEN' });
+      }
+      else {
+        dispatch({ type: 'SIGN_OUT' });
+      }
+    });
   },[]);
 
   const authContext = useMemo(() => ({
