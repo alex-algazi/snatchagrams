@@ -31,6 +31,7 @@ export default function App() {
 
   const [signInError, setSignInError] = useState('');
   const [signUpError, setSignUpError] = useState('');
+  const [gameUID, setGameUID] = useState('');
 
   const [state, dispatch] = useReducer(
     (prevState, action) => {
@@ -84,6 +85,7 @@ export default function App() {
   const authContext = useMemo(() => ({
     signInError: [signInError, setSignInError],
     signUpError: [signUpError, setSignUpError],
+    gameUID: [gameUID, setGameUID],
     signIn: async (data) => {
       signInWithEmailAndPassword(getAuth(app), data.email, data.password)
         .then((userCredential) => {
@@ -133,7 +135,16 @@ export default function App() {
       setSignInError('');
       setSignUpError('');
     },
-  }),[signInError, signUpError]);
+    createGame: async (myUID, otherUID) => {
+      setGameUID(push(ref(getDatabase(app), 'games'), {
+        challengerUID: myUID,
+        gameOver: 0,
+        oponentUID: otherUID,
+        whoseTurn: 0,
+        winner: 0,
+      }).key);
+    },
+  }),[signInError, signUpError, gameUID]);
 
   return (
     <AuthContext.Provider value={authContext}>

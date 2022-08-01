@@ -6,8 +6,9 @@ import AuthContext from '../components/auth/AuthContext';
 import * as SecureStore from 'expo-secure-store';
 
 export default function Home() {
-  const [displayName, setDisplayName] = useState('');
   const { signOut } = useContext(AuthContext);
+
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     async function getDisplayName() {
